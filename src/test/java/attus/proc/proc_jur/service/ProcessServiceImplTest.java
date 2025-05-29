@@ -4,15 +4,14 @@ import attus.proc.proc_jur.dto.*;
 import attus.proc.proc_jur.enums.ActionType;
 import attus.proc.proc_jur.enums.PartyType;
 import attus.proc.proc_jur.enums.Status;
-import attus.proc.proc_jur.handler.ProcessNotFound;
+import attus.proc.proc_jur.handler.ProcessNotFoundException;
 import attus.proc.proc_jur.model.Action;
 import attus.proc.proc_jur.model.Contact;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.repository.ContactRepository;
 import attus.proc.proc_jur.repository.ProcessRepository;
-import attus.proc.proc_jur.util.Transform;
-import org.aspectj.lang.annotation.Before;
+import attus.proc.proc_jur.util.EntityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,10 +34,10 @@ import static org.mockito.Mockito.when;
 class ProcessServiceImplTest {
 
     @Mock
-    private PartyServiceImpl partyService;
+    private EntityMapper entityMapper;
 
     @Mock
-    private ActionServiceImpl actionService;
+    private PartyServiceImpl partyService;
 
     @Mock
     private ProcessRepository processRepository;
@@ -128,7 +127,6 @@ class ProcessServiceImplTest {
         );
 
         when(partyService.getExistingParties(any())).thenReturn(new ArrayList<>(List.of(party)));
-        when(actionService.createAction(actionDto)).thenReturn(action);
         number = processService.create(dto);
         assert number.equals(number1);
     }
@@ -214,23 +212,15 @@ class ProcessServiceImplTest {
                 .build();
         when(processRepository.findByNumber(any())).thenReturn(Optional.of(process));
         when(processRepository.save(any())).thenReturn(process);
-        when(actionService.createAction(actionDto)).thenReturn(action2);
+        when(entityMapper.toEntity(actionDto)).thenReturn(action2);
         when(partyService.getNewParties(dto.getParties())).thenReturn(List.of(party2));
 
         processService.update(number1, dto);
         assert process.getOpeningDate().equals(date);
         assert process.getStatus().equals(dto.getStatus());
         assert process.getDescription().equals(dto.getDescription());
-        assert process.getParties()
-                .stream()
-                .allMatch(p -> process.getParties()
-                        .stream()
-                        .anyMatch(p1 -> p.getLegalEntityId().equals(p1.getLegalEntityId())));
-        assert process.getActions()
-                .stream()
-                .allMatch(a -> process.getActions()
-                        .stream()
-                        .anyMatch(a::equals));
+        assert process.getParties().size() == 2;
+        assert process.getActions().size() == 2;
 
         actionDto = new ActionDto(
                 ActionType.SENTENCE,
@@ -252,21 +242,13 @@ class ProcessServiceImplTest {
                 List.of(actionDto)
         );
 
-        when(actionService.createAction(actionDto)).thenReturn(action2);
+        when(entityMapper.toEntity(actionDto)).thenReturn(action2);
         processService.update(number1, dto);
         assert process.getOpeningDate().equals(date);
         assert process.getStatus().equals(dto.getStatus());
         assert process.getDescription().equals(dto.getDescription());
-        assert process.getParties()
-                .stream()
-                .allMatch(p -> process.getParties()
-                        .stream()
-                        .anyMatch(p1 -> p.getLegalEntityId().equals(p1.getLegalEntityId())));
-        assert process.getActions()
-                .stream()
-                .allMatch(a -> process.getActions()
-                        .stream()
-                        .anyMatch(a::equals));
+        assert process.getParties().size() == 2;
+        assert process.getActions().size() == 3;
     }
 
     @Test
@@ -309,7 +291,7 @@ class ProcessServiceImplTest {
                 .build();
         when(processRepository.findByNumberIn(any())).thenReturn(List.of(process));
         when(processRepository.saveAll(List.of(process))).thenReturn(List.of(process));
-        assertThrows(ProcessNotFound.class, () -> processService.archive(list));
+        assertThrows(ProcessNotFoundException.class, () -> processService.archive(list));
 
         Process process2 = Process
                 .builder()

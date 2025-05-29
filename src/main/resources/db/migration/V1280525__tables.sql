@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS tb_action (
 CREATE TABLE IF NOT EXISTS tb_party (
     id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(255) NOT NULL,
-    legal_entity_id VARCHAR(20),
+    legal_entity_id VARCHAR(20) NOT NULL,
     type VARCHAR(10) NOT NULL,
     process_id BIGINT NOT NULL,
     version BIGINT,

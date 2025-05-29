@@ -8,6 +8,6 @@ import java.util.Set;
 
 public interface PartyService {
 
-    List<Party> getExistingParties(Set<String> legalEntityIds);
+    List<Party> getExistingParties(List<PartyDto> dtos);
     List<Party> getNewParties(List<PartyDto> partyDtos);
 }

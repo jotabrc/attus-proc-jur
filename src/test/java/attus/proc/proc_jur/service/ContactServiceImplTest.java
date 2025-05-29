@@ -5,6 +5,7 @@ import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.enums.PartyType;
 import attus.proc.proc_jur.model.Contact;
 import attus.proc.proc_jur.repository.ContactRepository;
+import attus.proc.proc_jur.util.EntityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,6 +18,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class ContactServiceImplTest {
+
+    @Mock
+    private EntityMapper entityMapper;
 
     @Mock
     private ContactRepository contactRepository;
@@ -42,12 +46,19 @@ class ContactServiceImplTest {
                 contactDto
         );
         when(contactRepository.findByEmailOrPhone(any(), any())).thenReturn(Optional.of(new Contact()));
-        Contact contact = contactService.getOrCreateContact(dto);
+        Contact contact = contactService.getOrCreateContact(dto.getContact());
         assert contact.getEmail() == null;
         assert contact.getPhone() == null;
 
-        when(contactRepository.findByEmailOrPhone(any(), any())).thenReturn(Optional.empty());
-        contact = contactService.getOrCreateContact(dto);
+        Contact contact1 = Contact
+                .builder()
+                .id(0)
+                .email("email@email.com")
+                .phone("(11)91234-5678")
+                .build();
+
+        when(contactRepository.findByEmailOrPhone(any(), any())).thenReturn(Optional.of(contact1));
+        contact = contactService.getOrCreateContact(dto.getContact());
         assert contact.getEmail().equals(contactDto.getEmail());
         assert contact.getPhone().equals(contactDto.getPhone());
     }

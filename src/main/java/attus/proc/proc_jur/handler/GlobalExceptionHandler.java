@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProcessNotFound.class)
-    public ResponseEntity<String> handle(ProcessNotFound e) {
+    @ExceptionHandler(ProcessNotFoundException.class)
+    public ResponseEntity<String> handle(ProcessNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 

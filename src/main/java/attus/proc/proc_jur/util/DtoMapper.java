@@ -11,7 +11,7 @@ import attus.proc.proc_jur.model.Process;
 
 import java.util.List;
 
-public class Transform {
+public class DtoMapper {
 
     public static ProcessDto toDto(final Process process) {
         return new ProcessDto(
@@ -27,14 +27,14 @@ public class Transform {
     private static List<PartyDto> mapParties(final List<Party> parties) {
         return parties
                 .stream()
-                .map(Transform::toDto)
+                .map(DtoMapper::toDto)
                 .toList();
     }
 
     private static List<ActionDto> mapActions(final List<Action> actions) {
         return actions
                 .stream()
-                .map(Transform::toDto)
+                .map(DtoMapper::toDto)
                 .toList();
     }
 
