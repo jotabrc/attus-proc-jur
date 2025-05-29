@@ -56,7 +56,6 @@ public class Transform {
 
     private static ActionDto toDto(final Action action) {
         return new ActionDto(
-                null,
                 action.getType(),
                 action.getDescription()
         );

@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
-import java.util.UUID;
-
 class ActionServiceImplTest {
 
     @InjectMocks
@@ -23,7 +21,6 @@ class ActionServiceImplTest {
     @Test
     void createAction() {
         ActionDto dto = new ActionDto(
-                UUID.randomUUID().toString(),
                 ActionType.HEARING,
                 "Hearing short description"
         );

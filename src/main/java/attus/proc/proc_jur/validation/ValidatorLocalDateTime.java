@@ -6,17 +6,18 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
-public class ValidatorEmail implements ConstraintValidator<ValidEmail, String> {
+public class ValidatorLocalDateTime implements ConstraintValidator<ValidLocalDateTime, LocalDateTime> {
 
     @Override
-    public void initialize(ValidEmail constraintAnnotation) {
+    public void initialize(ValidLocalDateTime constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNullOrBlank(s)) return false;
-        return EmailValidator.getInstance().isValid(s);
+    public boolean isValid(LocalDateTime dateTime, ConstraintValidatorContext context) {
+        return ParameterCheck.isNull(dateTime);
     }
 }

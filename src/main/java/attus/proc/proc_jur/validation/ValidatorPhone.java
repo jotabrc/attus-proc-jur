@@ -10,20 +10,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class ValidatorDescription implements ConstraintValidator<ValidDescription, String> {
+public class ValidatorPhone implements ConstraintValidator<ValidPhone, String> {
 
-    @Value("${validation.pattern.description}")
+    @Value("${validation.pattern.phone}")
     private String regex;
 
     @Override
-    public void initialize(ValidDescription constraintAnnotation) {
+    public void initialize(ValidPhone constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
         Pattern pattern = Pattern.compile(Optional.ofNullable(regex)
-                .orElse("^[A-Za-z0-9.,;!?§¶(){}\\[\\]€$R$\\s\\p{M}\\p{L}]+$"));
+                .orElse("^\\d{10,15}$|^\\+?\\d{1,3}[\\s-]?\\(?\\d{2,4}\\)?[\\s-]?\\d{4,5}[\\s-]?\\d{4}$"));
         Matcher matcher = pattern.matcher(s);
         return matcher.matches();
     }

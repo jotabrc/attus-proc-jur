@@ -4,7 +4,9 @@ import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.dto.ProcessFilter;
 import attus.proc.proc_jur.enums.Status;
+import attus.proc.proc_jur.handler.OperationDeniedException;
 import attus.proc.proc_jur.handler.ProcessNotFound;
+import attus.proc.proc_jur.model.Action;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.repository.ProcessRepository;
@@ -15,11 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Validated
 @Service
 public class ProcessServiceImpl implements ProcessService {
 
@@ -34,28 +37,24 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     @Override
-    public String create(ProcessDto dto) {
+    public String create(final ProcessDto dto) {
         Process process = buildProcess(dto);
-        processRepository.save(process);
+        process = processRepository.save(process);
         return process.getNumber();
     }
 
     @Override
-    public void update(String processNumber, ProcessDto dto) {
-        Process process = processRepository.findByNumber(processNumber)
-                .orElseThrow(() ->
-                        new ProcessNotFound("Process with number %s not found".formatted(processNumber))
-                );
-        process
-                .setStatus(dto.getStatus())
-                .setDescription(dto.getDescription())
-                .setParties(getParties(dto.getParties()));
+    public void update(final String processNumber, final ProcessDto dto) {
+        Process process = getProcessByProcessNumber(processNumber);
+        checkProcessStatus(process.getStatus());
+        updateProcess(dto, process);
+        processRepository.save(process);
     }
 
     @Transactional
     @Override
-    public void archive(Set<String> processesNumbers) {
-        List<Process> processes = processRepository.findByNumberIn(processesNumbers);
+    public void archive(final Set<String> processesNumbers) {
+        List<Process> processes = getProcessByNumberIn(processesNumbers);
         checkNotFoundProcesses(processesNumbers, processes);
         setProcessToAchieved(processes);
         processRepository.saveAll(processes);
@@ -80,7 +79,9 @@ public class ProcessServiceImpl implements ProcessService {
         Process process = Process
                 .builder()
                 .number(UUID.randomUUID().toString())
-                .openingDate(dto.getOpeningDate().atZone(ZoneId.of("America/Sao_Paulo")))
+                .openingDate(Optional.ofNullable(dto.getOpeningDate())
+                        .orElse(LocalDateTime.now())
+                        .atZone(ZoneId.of("America/Sao_Paulo")))
                 .status(dto.getStatus())
                 .description(dto.getDescription())
                 .parties(getParties(Optional.ofNullable(dto.getParties())
@@ -120,6 +121,7 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     private static Map<String, Party> getPartyMap(final List<Party> parties) {
+        if (parties == null || parties.isEmpty()) return Collections.emptyMap();
         return parties
                 .stream()
                 .collect(Collectors.toMap(Party::getLegalEntityId, p -> p));
@@ -138,13 +140,53 @@ public class ProcessServiceImpl implements ProcessService {
         String notFound = processesNumbers.stream()
                 .filter(s -> !processMap.containsKey(s))
                 .collect(Collectors.joining(",", "[", "]"));
-        if (!notFound.isBlank()) throw new ProcessNotFound("Processes with number %s not found".formatted(notFound));
+        if (!notFound.isBlank() && !notFound.equals("[]")) throw new ProcessNotFound("Processes with number %s not found".formatted(notFound));
     }
 
     private static void setProcessToAchieved(final List<Process> processes) {
         processes
                 .forEach(p -> p
                         .setStatus(Status.ARCHIVED)
+                );
+    }
+
+    private void checkProcessStatus(final Status status) {
+        if (status.equals(Status.ARCHIVED)) throw new OperationDeniedException("An Archived process(es) cannot be updated");
+        else if (status.equals(Status.SUSPENDED)) throw new OperationDeniedException("A Suspended process(es) cannot be updated");
+    }
+
+    private List<Process> getProcessByNumberIn(Set<String> processesNumbers) {
+        List<Process> processes = processRepository.findByNumberIn(processesNumbers);
+        if (processes == null || processes.isEmpty()) throw new ProcessNotFound("No Process(es) found with number('s) %s"
+                .formatted(Optional.ofNullable(processesNumbers)
+                        .orElse(Collections.emptySet())
+                        .stream()
+                        .collect(Collectors
+                                .joining(",", "[", "]"))));
+        return processes;
+    }
+
+    private void updateProcess(ProcessDto dto, Process process) {
+        List<Action> newActionList = new ArrayList<>(Optional.ofNullable(process.getActions()).orElse(List.of()));
+        newActionList.addAll(Optional.ofNullable(dto.getActions())
+                .orElse(List.of())
+                .stream()
+                .map(actionService::createAction)
+                .toList());
+
+        List<Party> newPartyList = new ArrayList<>(Optional.ofNullable(process.getParties()).orElse(List.of()));
+        newPartyList.addAll(getParties(dto.getParties()));
+        process
+                .setStatus(dto.getStatus())
+                .setDescription(dto.getDescription())
+                .setParties(newPartyList)
+                .setActions(newActionList);
+    }
+
+    private Process getProcessByProcessNumber(String processNumber) {
+        return processRepository.findByNumber(processNumber)
+                .orElseThrow(() ->
+                        new ProcessNotFound("Process with number %s not found".formatted(processNumber))
                 );
     }
 }

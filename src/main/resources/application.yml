@@ -2,7 +2,9 @@ server:
   address: 0.0.0.0
   port: 8080
 spring:
-#  redis:
+  application:
+    name: proc-jur
+  #  redis:
 #    host: redis-cache
 #    port: ${REDIS_PORT}
 #    password: ${REDIS_PASSWORD}
