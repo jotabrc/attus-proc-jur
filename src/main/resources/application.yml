@@ -1,0 +1,46 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+spring:
+#  redis:
+#    host: redis-cache
+#    port: ${REDIS_PORT}
+#    password: ${REDIS_PASSWORD}
+#  cache:
+#    type: redis
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+logging:
+  level:
+    io.lettuce.core: TRACE
+    io.lettuce: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.servlet.DispatcherServlet: DEBUG
+    org.springframework.data.redis: DEBUG
+    org.springframework.cache.interceptor: DEBUG
+
+validation:
+  pattern:
+    name: "[\\p{L}\\p{M}\\.\\s'-]{4,255}"
+    processnumber: "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}"
+    description: "^[A-Za-z0-9.,;!?§¶(){}\\[\\]€$R$\\s\\p{M}\\p{L}]+$"
+    legalid: "^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{14}|\\d{2}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2})$"
+    phone: "^\\d{10,15}$|^\\+?\\d{1,3}[\\s-]?\\(?\\d{2,4}\\)?[\\s-]?\\d{4,5}[\\s-]?\\d{4}$"

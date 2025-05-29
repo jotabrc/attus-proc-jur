@@ -1,0 +1,53 @@
+version: "3.9"
+
+networks:
+  app-network:
+    driver: overlay
+
+volumes:
+  proc-jur-data:
+
+services:
+
+
+  proc-jur-postgres-sql:
+    image: postgres:alpine
+    volumes:
+      - proc-jur-data:/var/lib/postgresql/data
+    env_file:
+      - .env.postgres
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == database
+      restart_policy:
+        condition: on-failure
+
+  proc-jur-service:
+    depends_on:
+      - proc-jur-postgres-sql
+    build:
+      context: .
+      dockerfile: .dockerfile
+    image: jotabr092/proc-jur-service
+    env_file:
+      - .env
+      - .env.postgres
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname != database
+      update_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network

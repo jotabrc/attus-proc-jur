@@ -1,0 +1,1 @@
+{"rsync":{"/data/proc-jur":{"type":"rsync","rsync__exclude":[".vagrant"],"guestpath":"/data/proc-jur","hostpath":"/home/joao/Projects/proc-jur","disabled":false,"__vagrantfile":true,"exclude":[".vagrant"],"owner":"vagrant","group":"vagrant"}},"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/joao/Projects/proc-jur","disabled":false,"__vagrantfile":true}}}
