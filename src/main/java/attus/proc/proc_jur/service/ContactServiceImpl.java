@@ -8,7 +8,7 @@ import attus.proc.proc_jur.util.EntityMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ContactServiceImpl implements ContactService {
+public final class ContactServiceImpl implements ContactService {
 
     private final EntityMapper entityMapper;
     private final ContactRepository contactRepository;

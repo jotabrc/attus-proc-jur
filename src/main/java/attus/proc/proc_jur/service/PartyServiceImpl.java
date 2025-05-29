@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class PartyServiceImpl implements PartyService {
+public final class PartyServiceImpl implements PartyService {
 
     private final EntityMapper entityMapper;
     private final ContactService contactService;

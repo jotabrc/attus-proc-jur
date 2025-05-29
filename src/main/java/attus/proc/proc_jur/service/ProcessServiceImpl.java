@@ -12,18 +12,21 @@ import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.repository.ProcessRepository;
 import attus.proc.proc_jur.util.EntityMapper;
 import attus.proc.proc_jur.util.DtoMapper;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Validated
 @Service
-public class ProcessServiceImpl implements ProcessService {
+public final class ProcessServiceImpl implements ProcessService {
 
     private final PartyService partyService;
     private final EntityMapper entityMapper;
@@ -74,32 +77,7 @@ public class ProcessServiceImpl implements ProcessService {
 
     // ===== PRIVATE METHODS =====
 
-    @Deprecated(forRemoval = true)
-    private Process buildProcess(final ProcessDto dto) {
-        Process process = Process
-                .builder()
-                .number(UUID.randomUUID().toString())
-                .openingDate(Optional.ofNullable(dto.getOpeningDate())
-                        .orElse(LocalDateTime.now())
-                        .atZone(ZoneId.of("America/Sao_Paulo")))
-                .status(dto.getStatus())
-                .description(dto.getDescription())
-                .parties(getParties(Optional.ofNullable(dto.getParties())
-                        .orElse(List.of())))
-                .actions(Optional.ofNullable(dto.getActions())
-                        .orElse(List.of())
-                        .stream()
-                        .map(entityMapper::toEntity)
-                        .toList())
-                .build();
-        if (process.getParties() != null)
-            process.getParties().forEach(p -> p.setProcess(process));
-        if (process.getActions() != null)
-            process.getActions().forEach(a -> a.setProcess(process));
-        return process;
-    }
-
-    private List<Party> getParties(final List<PartyDto> partyDtos) {
+    private List<Party> getParties(@NotNull final List<PartyDto> partyDtos) {
         if (partyDtos.isEmpty()) return List.of();
 
         List<Party> parties = partyService.getExistingParties(partyDtos);
@@ -111,20 +89,20 @@ public class ProcessServiceImpl implements ProcessService {
         return parties;
     }
 
-    private static Map<String, Party> getPartyMap(final List<Party> parties) {
+    private static Map<String, Party> getPartyMap(@NotNull final List<Party> parties) {
         if (parties == null || parties.isEmpty()) return Collections.emptyMap();
         return parties
                 .stream()
                 .collect(Collectors.toMap(Party::getLegalEntityId, p -> p));
     }
 
-    private static List<PartyDto> getNewPartyDtos(final List<PartyDto> partyDtos, final Map<String, Party> partyMap) {
+    private static List<PartyDto> getNewPartyDtos(@NotNull final List<PartyDto> partyDtos, @NotNull final Map<String, Party> partyMap) {
         return partyDtos.stream()
                 .filter(p -> !partyMap.containsKey(p.getLegalEntityId()))
                 .toList();
     }
 
-    private void checkNotFoundProcesses(final Set<String> processesNumbers, final List<Process> processes) {
+    private void checkNotFoundProcesses(@NotNull final Set<String> processesNumbers, @NotNull final List<Process> processes) {
         Map<String, Process> processMap = processes
                 .stream()
                 .collect(Collectors.toMap(Process::getNumber, p -> p));
@@ -141,12 +119,12 @@ public class ProcessServiceImpl implements ProcessService {
                 );
     }
 
-    private void checkProcessStatus(final Status status) {
+    private void checkProcessStatus(@NotNull final Status status) {
         if (status.equals(Status.ARCHIVED)) throw new OperationDeniedException("An Archived process(es) cannot be updated");
         else if (status.equals(Status.SUSPENDED)) throw new OperationDeniedException("A Suspended process(es) cannot be updated");
     }
 
-    private List<Process> getProcessByNumberIn(final Set<String> processesNumbers) {
+    private List<Process> getProcessByNumberIn(@NotNull final Set<String> processesNumbers) {
         List<Process> processes = processRepository.findByNumberIn(processesNumbers);
         if (processes == null || processes.isEmpty()) throw new ProcessNotFoundException("No Process(es) found with number('s) %s"
                 .formatted(Optional.ofNullable(processesNumbers)
@@ -157,7 +135,7 @@ public class ProcessServiceImpl implements ProcessService {
         return processes;
     }
 
-    private void updateProcess(final ProcessDto dto, final Process process) {
+    private void updateProcess(@NotNull final ProcessDto dto, @NotNull final Process process) {
         List<Action> newActionList = new ArrayList<>(Optional.ofNullable(process.getActions()).orElse(List.of()));
         newActionList.addAll(Optional.ofNullable(dto.getActions())
                 .orElse(List.of())
@@ -174,7 +152,7 @@ public class ProcessServiceImpl implements ProcessService {
                 .setActions(newActionList);
     }
 
-    private Process getProcessByProcessNumber(final String processNumber) {
+    private Process getProcessByProcessNumber(@NotNull final String processNumber) {
         return processRepository.findByNumber(processNumber)
                 .orElseThrow(() ->
                         new ProcessNotFoundException("Process with number %s not found".formatted(processNumber))

@@ -55,7 +55,7 @@ public class TokenGlobalFilter extends OncePerRequestFilter {
     }
 
     private List<SimpleGrantedAuthority> authorities(List<String> roles) {
-        return (List) roles.stream()
+        return roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors
                         .toList());
