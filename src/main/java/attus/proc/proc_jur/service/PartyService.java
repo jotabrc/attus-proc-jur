@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface PartyService {
 
+    void attach(Party party);
     Optional<Party> getExistingParties(String legalEntityId);
     List<Party> getNewParties(List<PartyDto> partyDtos);
 }

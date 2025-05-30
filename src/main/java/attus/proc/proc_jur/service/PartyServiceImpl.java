@@ -3,7 +3,6 @@ package attus.proc.proc_jur.service;
 import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.repository.PartyRepository;
-import attus.proc.proc_jur.util.EntityMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,12 +11,15 @@ import java.util.Optional;
 @Service
 public class PartyServiceImpl implements PartyService {
 
-    private final EntityMapper entityMapper;
     private final PartyRepository partyRepository;
 
-    public PartyServiceImpl(EntityMapper entityMapper, PartyRepository partyRepository) {
-        this.entityMapper = entityMapper;
+    public PartyServiceImpl(PartyRepository partyRepository) {
         this.partyRepository = partyRepository;
+    }
+
+    @Override
+    public void attach(final Party party) {
+        partyRepository.save(party);
     }
 
     @Override

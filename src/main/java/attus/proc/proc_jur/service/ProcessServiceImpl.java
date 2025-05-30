@@ -38,6 +38,7 @@ public class ProcessServiceImpl implements ProcessService {
         this.processRepository = processRepository;
     }
 
+    @Transactional
     @Override
     public String create(final ProcessDto dto) {
         Process process = entityMapper.toEntity(dto);
@@ -47,6 +48,7 @@ public class ProcessServiceImpl implements ProcessService {
         return process.getNumber();
     }
 
+    @Transactional
     @Override
     public void update(final String processNumber, final ProcessDto dto) {
         Process process = getProcessByProcessNumber(processNumber);
@@ -98,6 +100,7 @@ public class ProcessServiceImpl implements ProcessService {
         return partyService.getExistingParties(p.getLegalEntityId()).orElseGet(() -> {
             var result = entityMapper.toEntity(p);
             result.setProcesses(List.of(process));
+            partyService.attach(result);
             return result;
         });
     }
