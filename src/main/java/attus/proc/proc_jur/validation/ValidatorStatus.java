@@ -18,7 +18,10 @@ public class ValidatorStatus implements ConstraintValidator<ValidStatus, Status>
 
     @Override
     public boolean isValid(Status s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNull(s)) return false;
-        return Arrays.asList(Status.values()).contains(s);
+        if (ParameterCheck.isNull(s) || !Arrays.asList(Status.values()).contains(s)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

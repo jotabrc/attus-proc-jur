@@ -33,11 +33,8 @@ Definição dos DTOs para transferir dados entre as camadas de apresentação e 
 
 * Utilização de Flyway para migração do banco de dados de forma contínua e estruturada.
 
-## Diagrama
-![er.png](docs/er.png)
-
 ## Variáveis de Ambiente
-Para deploy com [docker-compose.yml](docker-compose.yml) criar dois arquivos .env (.env e .env.postgres) e configurar as variáveis:
+Para deploy com [docker-compose.yml](docker-compose.yml) criar os arquivos .env (.env e .env.postgres) e configurar as variáveis:
 - .env
 ```text
 SECRET_KEY
@@ -54,7 +51,11 @@ POSTGRES_PORT
 ```
 
 ## Gerar JWT
-Foi adicionar no projeto com o método main no pacote `unsecure` a classe `Unsecure`, utilizando a mesma `SECRET_KEY` da aplicação será possível gerar um token para testes.
+Foi adicionado na parta `test-only` a classe [Unsecure.java](test-only/unsecure/Unsecure.java), para fins de teste pode-se utilizar com a mesma `SECRET_KEY` da aplicação e criar um JWT compatível com a aplicação.
 
 ## TLS
-Requer certificado `keystore.p12`.
+Requer certificado `keystore.p12` no `classpath`.
+
+## Diagrama
+![er.png](docs/er.png)
+![attus-proc-jur-dark.png](docs/attus-proc-jur-dark.png)

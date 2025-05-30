@@ -1,4 +1,4 @@
-package attus.proc.proc_jur.unsecure;
+package unsecure;
 
 import attus.proc.proc_jur.config.jwt.TokenCreator;
 import attus.proc.proc_jur.config.jwt.TokenObject;

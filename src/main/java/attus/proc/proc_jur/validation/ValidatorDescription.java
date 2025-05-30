@@ -1,5 +1,6 @@
 package attus.proc.proc_jur.validation;
 
+import attus.proc.proc_jur.util.ParameterCheck;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,9 +23,14 @@ public class ValidatorDescription implements ConstraintValidator<ValidDescriptio
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
+        if (ParameterCheck.isNullOrBlank(s)) return false;
         Pattern pattern = Pattern.compile(Optional.ofNullable(regex)
-                .orElse("^[A-Za-z0-9.,;!?§¶(){}\\[\\]€$R$\\s\\p{M}\\p{L}]+$"));
+                .orElse("^$|^[A-Za-z0-9.,;!?§¶(){}\\[\\]€$R$\\s\\p{M}\\p{L}]+$"));
         Matcher matcher = pattern.matcher(s);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

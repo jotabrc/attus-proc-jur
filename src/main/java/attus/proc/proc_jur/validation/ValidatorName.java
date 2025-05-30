@@ -23,10 +23,17 @@ public class ValidatorName implements ConstraintValidator<ValidName, String> {
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNullOrBlank(s)) return false;
+        if (ParameterCheck.isNullOrBlank(s)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
         Pattern pattern = Pattern.compile(Optional.ofNullable(regex)
                 .orElse("[\\p{L}\\p{M}\\.\\s'-]{4,255}"));
         Matcher matcher = pattern.matcher(s);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

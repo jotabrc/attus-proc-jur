@@ -3,7 +3,6 @@ package attus.proc.proc_jur.validation;
 import attus.proc.proc_jur.util.ParameterCheck;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -18,6 +17,10 @@ public class ValidatorLocalDateTime implements ConstraintValidator<ValidLocalDat
 
     @Override
     public boolean isValid(LocalDateTime dateTime, ConstraintValidatorContext context) {
-        return ParameterCheck.isNull(dateTime);
+        if (ParameterCheck.isNull(dateTime)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

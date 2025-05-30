@@ -1,7 +1,6 @@
 package attus.proc.proc_jur.validation;
 
 import attus.proc.proc_jur.enums.PartyType;
-import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.util.ParameterCheck;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -19,7 +18,10 @@ public class ValidatorPartyType implements ConstraintValidator<ValidPartyType, P
 
     @Override
     public boolean isValid(PartyType p, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNull(p)) return false;
-        return Arrays.asList(PartyType.values()).contains(p);
+        if (ParameterCheck.isNull(p) || !Arrays.asList(PartyType.values()).contains(p)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

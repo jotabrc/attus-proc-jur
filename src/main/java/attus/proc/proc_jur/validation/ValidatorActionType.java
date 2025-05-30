@@ -1,7 +1,6 @@
 package attus.proc.proc_jur.validation;
 
 import attus.proc.proc_jur.enums.ActionType;
-import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.util.ParameterCheck;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -19,7 +18,10 @@ public class ValidatorActionType implements ConstraintValidator<ValidActionType,
 
     @Override
     public boolean isValid(ActionType a, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNull(a)) return false;
-        return Arrays.asList(ActionType.values()).contains(a);
+        if (ParameterCheck.isNull(a) || !Arrays.asList(ActionType.values()).contains(a)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

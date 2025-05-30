@@ -13,7 +13,7 @@ import java.util.List;
 public class FormattingServiceImpl implements FormattingService {
 
     @Value("${validation.pattern.formatting.remove}")
-    public String REMOVE_PATTERN;
+    private String REMOVE_PATTERN;
 
     @Override
     public String removeFormatting(@NotNull final String s) {

@@ -23,10 +23,18 @@ public class ValidatorProcessNumber implements ConstraintValidator<ValidProcessN
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNullOrBlank(s)) return false;
+        if (ParameterCheck.isNullOrBlank(s)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
         Pattern pattern = Pattern.compile(Optional.ofNullable(regex)
                 .orElse("\\p{a-f0-9}{8}-\\p{a-f0-9}{4}-\\p{a-f0-9}{4}-\\p{a-f0-9}{12}"));
         Matcher matcher = pattern.matcher(s);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+
+        return true;
     }
 }

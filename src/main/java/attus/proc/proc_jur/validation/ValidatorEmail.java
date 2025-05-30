@@ -16,7 +16,10 @@ public class ValidatorEmail implements ConstraintValidator<ValidEmail, String> {
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNullOrBlank(s)) return false;
-        return EmailValidator.getInstance().isValid(s);
+        if (ParameterCheck.isNullOrBlank(s) || !EmailValidator.getInstance().isValid(s)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }

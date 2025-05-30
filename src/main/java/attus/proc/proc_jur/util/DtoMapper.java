@@ -11,6 +11,8 @@ import java.util.List;
 
 public class DtoMapper {
 
+    private DtoMapper() {}
+
     public static ProcessDto toDto(final Process process) {
         return new ProcessDto(
                 process.getOpeningDate().toLocalDateTime(),

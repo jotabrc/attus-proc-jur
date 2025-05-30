@@ -23,10 +23,17 @@ public class ValidatorLegalId implements ConstraintValidator<ValidLegalId, Strin
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        if (ParameterCheck.isNullOrBlank(s)) return false;
+        if (ParameterCheck.isNullOrBlank(s)) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
         Pattern pattern = Pattern.compile(Optional.ofNullable(regex)
                 .orElse("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{14}|\\d{2}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2})$"));
         Matcher matcher = pattern.matcher(s);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            ConstraintMessage.createConstraintMessage(context);
+            return false;
+        }
+        return true;
     }
 }
