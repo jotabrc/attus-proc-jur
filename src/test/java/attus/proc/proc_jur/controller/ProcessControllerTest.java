@@ -2,15 +2,12 @@ package attus.proc.proc_jur.controller;
 
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.enums.Status;
-import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.service.ProcessServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +25,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,10 +59,8 @@ class ProcessControllerTest {
                             "fullName": "Joe Doe",
                             "legalEntityId": "12345678987",
                             "type": "AUTHOR",
-                            "contact": {
-                                "email": "email@email.com",
-                                "phone": "14598742305"
-                            }
+                            "email": "email@email.com",
+                            "phone": "14598742305"
                         }
                     ],
                     "actions": [
@@ -104,10 +98,8 @@ class ProcessControllerTest {
                             "fullName": "Joe Doe",
                             "legalEntityId": "12345678987",
                             "type": "AUTHOR",
-                            "contact": {
-                                "email": "email@email.com",
-                                "phone": "14598742305"
-                            }
+                            "email": "email@email.com",
+                            "phone": "14598742305"
                         }
                     ],
                     "actions": [

@@ -13,15 +13,15 @@ import java.util.List;
 /**
  * For test only
  */
-public class unsecure {
+public class Unsecure {
 
     public static void main(String[] args) {
 
-        String key = getKey();
+        String key = "ezBqr2G/W2c5L6d8rh8Gmfaweu84043Y/91IvSYURluxvFz6vxDxM6IwEaxteZU46zhwKWzI65oK541WdWPs8g=="; //getKey();
         var obj = TokenObject.builder()
                 .subject("admin-uuid")
                 .issuedAt(Date.from(Instant.now()))
-                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .expiration(new Date(System.currentTimeMillis() + 36000000000L))
                 .roles(List.of("ADMIN"))
                 .build();
         String jwt = TokenCreator.encode(

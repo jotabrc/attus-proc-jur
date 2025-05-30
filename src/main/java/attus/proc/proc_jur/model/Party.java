@@ -4,12 +4,17 @@ import attus.proc.proc_jur.enums.PartyType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "tb_party")
+@Table(indexes = {
+        @Index(name = "idx_legal_entity_id", columnList = "legal_entity_id", unique = true)
+})
 public class Party {
 
     @Id
@@ -26,12 +31,19 @@ public class Party {
     @Column(nullable = false)
     private PartyType type;
 
-    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Contact contact;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-    @ManyToOne
-    @JoinColumn(name = "process_id", nullable = false)
-    private Process process;
+    @Column(nullable = false, unique = true)
+    private String phone;
+
+    @ManyToMany
+    @JoinTable(
+            name = "tb_party_process",
+            joinColumns = @JoinColumn(name = "party_id"),
+            inverseJoinColumns = @JoinColumn(name = "process_id")
+    )
+    private List<Process> processes;
 
     @Version
     private Long version;

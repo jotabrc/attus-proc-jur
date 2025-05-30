@@ -1,11 +1,9 @@
 package attus.proc.proc_jur.util;
 
 import attus.proc.proc_jur.dto.ActionDto;
-import attus.proc.proc_jur.dto.ContactDto;
 import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.model.Action;
-import attus.proc.proc_jur.model.Contact;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 
@@ -43,14 +41,8 @@ public class DtoMapper {
                 party.getFullName(),
                 party.getLegalEntityId(),
                 party.getType(),
-                toDto(party.getContact())
-        );
-    }
-
-    private static ContactDto toDto(final Contact contact) {
-        return new ContactDto(
-                contact.getEmail(),
-                contact.getPhone()
+                party.getEmail(),
+                party.getPhone()
         );
     }
 

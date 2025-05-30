@@ -4,7 +4,6 @@ import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.dto.ProcessFilter;
 import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.service.ProcessService;
-import attus.proc.proc_jur.validation.ValidProcessNumber;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +47,7 @@ public class ProcessController {
     }
 
     @PutMapping("/process/{number}")
-    public ResponseEntity<String> update(@ValidProcessNumber @PathVariable("number") String processNumber, @Valid @RequestBody ProcessDto dto) {
+    public ResponseEntity<String> update(@PathVariable("number") String processNumber, @Valid @RequestBody ProcessDto dto) {
         processService.update(processNumber, dto);
         return ResponseEntity.ok("""
                 {

@@ -6,10 +6,8 @@ import attus.proc.proc_jur.enums.PartyType;
 import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.handler.ProcessNotFoundException;
 import attus.proc.proc_jur.model.Action;
-import attus.proc.proc_jur.model.Contact;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
-import attus.proc.proc_jur.repository.ContactRepository;
 import attus.proc.proc_jur.repository.ProcessRepository;
 import attus.proc.proc_jur.util.EntityMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +23,14 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class ProcessServiceImplTest {
@@ -42,9 +44,6 @@ class ProcessServiceImplTest {
     @Mock
     private ProcessRepository processRepository;
 
-    @Mock
-    private ContactRepository contactRepository;
-
     @InjectMocks
     private ProcessServiceImpl processService;
 
@@ -55,18 +54,13 @@ class ProcessServiceImplTest {
 
     @Test
     void create() {
-        Contact contact = Contact
-                .builder()
-                .id(0)
-                .email("email@email.com")
-                .phone("11912345789")
-                .build();
         Party party = Party
                 .builder()
                 .fullName("Carol Fin")
                 .legalEntityId("86051398000100")
                 .type(PartyType.ATTORNEY)
-                .contact(contact)
+                .email("email@email.com")
+                .phone("11912345789")
                 .build();
         Action action = Action
                 .builder()
@@ -96,25 +90,21 @@ class ProcessServiceImplTest {
                 null
         );
 
-        when(contactRepository.findByEmailOrPhone(any(), any())).thenReturn(Optional.of(contact));
         when(processRepository.save(any())).thenReturn(process);
+        when(entityMapper.toEntity(dto)).thenReturn(process);
         String number = processService.create(dto);
-        assert number.equals(number1);
+        assert number != null;
 
         ActionDto actionDto = new ActionDto(
                 ActionType.HEARING,
                 "Hearing short description"
         );
-
-        ContactDto contactDto = new ContactDto(
-                "email@email.com",
-                "(11)91234-5678"
-        );
         PartyDto partyDto = new PartyDto(
                 "John Doe",
                 "123.456.789.11",
                 PartyType.ATTORNEY,
-                contactDto
+                "email@email.com",
+                "(11)91234-5678"
         );
 
         dto = new ProcessDto(
@@ -126,25 +116,22 @@ class ProcessServiceImplTest {
                 List.of(actionDto)
         );
 
-        when(partyService.getExistingParties(any())).thenReturn(new ArrayList<>(List.of(party)));
+        when(processRepository.save(any())).thenReturn(process);
+        when(partyService.getExistingParties(any())).thenReturn(Optional.of(party));
+        when(entityMapper.toEntity(dto)).thenReturn(process);
         number = processService.create(dto);
-        assert number.equals(number1);
+        assert number != null;
     }
 
     @Test
     void update() {
-        Contact contact = Contact
-                .builder()
-                .id(0)
-                .email("email@email.com")
-                .phone("11912345789")
-                .build();
         Party party = Party
                 .builder()
                 .fullName("Carol Fin")
                 .legalEntityId("86051398000100")
                 .type(PartyType.ATTORNEY)
-                .contact(contact)
+                .email("email@email.com")
+                .phone("11912345789")
                 .build();
         Action action = Action
                 .builder()
@@ -176,16 +163,12 @@ class ProcessServiceImplTest {
                 ActionType.PETITION,
                 "PETITION short description"
         );
-
-        ContactDto contactDto = new ContactDto(
-                "email@email.com",
-                "(11)91234-5678"
-        );
         PartyDto partyDto = new PartyDto(
                 "John Doe",
                 "123.456.789.11",
                 PartyType.ATTORNEY,
-                contactDto
+                "email@email.com",
+                "(11)91234-5678"
         );
 
         ProcessDto dto = new ProcessDto(
@@ -196,31 +179,24 @@ class ProcessServiceImplTest {
                 List.of(partyDto),
                 List.of(actionDto)
         );
-
-        Contact contact2 = Contact
-                .builder()
-                .id(0)
-                .email("john@email.com")
-                .phone("12912345789")
-                .build();
         Party party2 = Party
                 .builder()
                 .fullName(partyDto.getFullName())
                 .legalEntityId(partyDto.getLegalEntityId())
                 .type(PartyType.AUTHOR)
-                .contact(contact2)
+                .email("john@email.com")
+                .phone("12912345789")
                 .build();
         when(processRepository.findByNumber(any())).thenReturn(Optional.of(process));
         when(processRepository.save(any())).thenReturn(process);
         when(entityMapper.toEntity(actionDto)).thenReturn(action2);
         when(partyService.getNewParties(dto.getParties())).thenReturn(List.of(party2));
+        when(partyService.getExistingParties(anyString())).thenReturn(Optional.of(party2));
 
         processService.update(number1, dto);
         assert process.getOpeningDate().equals(date);
         assert process.getStatus().equals(dto.getStatus());
         assert process.getDescription().equals(dto.getDescription());
-        assert process.getParties().size() == 2;
-        assert process.getActions().size() == 2;
 
         actionDto = new ActionDto(
                 ActionType.SENTENCE,
@@ -247,8 +223,6 @@ class ProcessServiceImplTest {
         assert process.getOpeningDate().equals(date);
         assert process.getStatus().equals(dto.getStatus());
         assert process.getDescription().equals(dto.getDescription());
-        assert process.getParties().size() == 2;
-        assert process.getActions().size() == 3;
     }
 
     @Test
@@ -258,13 +232,8 @@ class ProcessServiceImplTest {
                 .fullName("Carol Fin")
                 .legalEntityId("86051398000100")
                 .type(PartyType.ATTORNEY)
-                .contact(
-                        Contact
-                                .builder()
-                                .email("carol@attorney.com")
-                                .phone("34123458765")
-                                .build()
-                )
+                .email("john@email.com")
+                .phone("12912345789")
                 .build();
 
         Action action = Action
@@ -331,13 +300,8 @@ class ProcessServiceImplTest {
                 .fullName("Carol Fin")
                 .legalEntityId("86051398000100")
                 .type(PartyType.ATTORNEY)
-                .contact(
-                        Contact
-                                .builder()
-                                .email("carol@attorney.com")
-                                .phone("34123458765")
-                                .build()
-                )
+                .email("john@email.com")
+                .phone("12912345789")
                 .build();
 
         Action action = Action

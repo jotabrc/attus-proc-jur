@@ -1,11 +1,9 @@
 package attus.proc.proc_jur.util;
 
 import attus.proc.proc_jur.dto.ActionDto;
-import attus.proc.proc_jur.dto.ContactDto;
 import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.model.Action;
-import attus.proc.proc_jur.model.Contact;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 import org.springframework.stereotype.Component;
@@ -58,14 +56,6 @@ public class EntityMapper {
                 .type(Optional
                         .of(dto.getType())
                         .orElse(null))
-                .contact(toEntity(dto.getContact()))
-                .build();
-    }
-
-    public Contact toEntity(final ContactDto dto) {
-        if (dto == null) return null;
-        return Contact
-                .builder()
                 .email(dto.getEmail())
                 .phone(dto.getPhone())
                 .build();

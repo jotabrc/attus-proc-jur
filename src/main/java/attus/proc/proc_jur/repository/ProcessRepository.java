@@ -17,10 +17,13 @@ public interface ProcessRepository extends JpaRepository<Process, Long> {
 
     Optional<Process> findByNumber(String number);
     List<Process> findByNumberIn(Set<String> number);
-    Page<Process> findByOpeningDate(LocalDate date, Pageable pageable);
+
+    @Query("SELECT p FROM tb_process p WHERE CAST(p.openingDate AS date) = :localDate")
+    Page<Process> findByOpeningDate(@Param("localDate") LocalDate localDate, Pageable pageable);
+//    Page<Process> findByOpeningDate(LocalDate date, Pageable pageable);
     Page<Process> findByStatus(Status status, Pageable pageable);
 
-    @Query("SELECT p FROM tb_process p JOIN p.parties party WHERE party.legalEntityId = :legalEntityId ORDER BY p.number")
+    @Query("SELECT p FROM tb_process p JOIN p.parties party WHERE party.legalEntityId = :legalEntityId ORDER BY p.openingDate")
     Page<Process> findByPartyLegalEntityId(@Param("legalEntityId") String legalEntityId, Pageable pageable);
 
 }

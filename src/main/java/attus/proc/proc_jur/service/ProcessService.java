@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Set;
 
-public sealed interface ProcessService permits ProcessServiceImpl {
+public interface ProcessService {
 
     String create(ProcessDto dto);
     void update(String processNumber, ProcessDto dto);

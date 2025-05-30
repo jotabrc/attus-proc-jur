@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 @Component
 public class ValidatorLegalId implements ConstraintValidator<ValidLegalId, String> {
 
-    @Value("${validation.pattern.legalId}")
+    @Value("${validation.pattern.legalid}")
     private String regex;
 
     @Override

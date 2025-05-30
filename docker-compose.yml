@@ -5,7 +5,8 @@ networks:
     driver: overlay
 
 volumes:
-  proc-jur-data:
+  proc-jur-data-sql:
+  redis-data:
 
 services:
 
@@ -13,13 +14,13 @@ services:
   proc-jur-postgres-sql:
     image: postgres:alpine
     volumes:
-      - proc-jur-data:/var/lib/postgresql/data
+      - proc-jur-data-sql:/var/lib/postgresql/data
     env_file:
       - .env.postgres
     ports:
       - "5433:5432"
-    networks:
-      - app-network
+#    networks:
+#      - app-network
     deploy:
       replicas: 1
       placement:
@@ -36,7 +37,7 @@ services:
 #      dockerfile: .dockerfile
 #    image: jotabr092/proc-jur-service
     image: openjdk:21
-    container_name: my-java-app
+    container_name: proc-jur-service
     env_file:
       - .env
       - .env.postgres
@@ -51,8 +52,8 @@ services:
         condition: on-failure
     ports:
       - "8080:8080"
-    networks:
-      - app-network
+#    networks:
+#      - app-network
     volumes:
       - ./target/proc-jur-0.0.1-SNAPSHOT.jar:/app/app.jar
     command: ["java", "-jar", "/app/app.jar"]

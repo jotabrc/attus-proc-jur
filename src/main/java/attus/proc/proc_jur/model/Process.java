@@ -15,6 +15,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "tb_process")
+@Table(indexes = {
+        @Index(name = "idx_process_number", columnList = "number", unique = true),
+        @Index(name = "idx_status", columnList = "status", unique = true),
+        @Index(name = "idx_opening_date", columnList = "opening_date", unique = true)
+})
 public class Process {
 
     @Id
@@ -34,10 +39,10 @@ public class Process {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @ManyToMany(mappedBy = "processes", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Party> parties;
 
-    @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Action> actions;
 
     @Version

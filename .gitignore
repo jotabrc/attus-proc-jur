@@ -34,3 +34,5 @@ build/
 /worker.sh
 /.env.postgres
 /.env
+/redis/.env
+/src/main/resources/keystore.p12

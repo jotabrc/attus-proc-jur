@@ -1,10 +1,7 @@
 package attus.proc.proc_jur.dto;
 
 import attus.proc.proc_jur.enums.PartyType;
-import attus.proc.proc_jur.validation.ValidLegalId;
-import attus.proc.proc_jur.validation.ValidName;
-import attus.proc.proc_jur.validation.ValidPartyType;
-import jakarta.validation.Valid;
+import attus.proc.proc_jur.validation.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +20,9 @@ public class PartyDto {
     @ValidPartyType
     private final PartyType type;
 
-    @Valid
-    private final ContactDto contact;
+    @ValidEmail
+    private final String email;
+
+    @ValidPhone
+    private final String phone;
 }
