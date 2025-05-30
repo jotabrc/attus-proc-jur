@@ -51,7 +51,7 @@ POSTGRES_PORT
 ```
 
 ## Gerar JWT
-Foi adicionado na parta `test-only` a classe [Unsecure.java](test-only/unsecure/Unsecure.java), para fins de teste pode-se utilizar com a mesma `SECRET_KEY` da aplicação e criar um JWT compatível com a aplicação.
+Foi adicionado na parta `test-only` a classe [Unsecure.java](test-only/unsecure/Unsecure.java), pode-se utilizar com a mesma `SECRET_KEY` da aplicação e criar um JWT compatível para fins de teste.
 
 ## TLS
 Requer certificado `keystore.p12` no `classpath`.
