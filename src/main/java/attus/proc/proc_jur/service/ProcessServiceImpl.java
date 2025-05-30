@@ -3,6 +3,7 @@ package attus.proc.proc_jur.service;
 import attus.proc.proc_jur.dto.PartyDto;
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.dto.ProcessFilter;
+import attus.proc.proc_jur.dto.RequestProcessDto;
 import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.handler.OperationDeniedException;
 import attus.proc.proc_jur.handler.ProcessNotFoundException;
@@ -10,9 +11,9 @@ import attus.proc.proc_jur.model.Action;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.repository.ProcessRepository;
-import attus.proc.proc_jur.util.DtoMapper;
+import attus.proc.proc_jur.service.filter.FilterStrategy;
+import attus.proc.proc_jur.service.filter.ProcessFilterSelector;
 import attus.proc.proc_jur.util.EntityMapper;
-import attus.proc.proc_jur.util.RemoveFormatting;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,62 +29,59 @@ import java.util.stream.Stream;
 @Service
 public class ProcessServiceImpl implements ProcessService {
 
-    private final PartyService partyService;
-    private final EntityMapper entityMapper;
     private final ProcessRepository processRepository;
 
-    public ProcessServiceImpl(PartyService partyService, EntityMapper entityMapper, ProcessRepository processRepository) {
-        this.partyService = partyService;
-        this.entityMapper = entityMapper;
+    private final PartyService partyService;
+    private final FormattingService formattingService;
+    private final EntityMapper entityMapper;
+
+    public ProcessServiceImpl(ProcessRepository processRepository, PartyService partyService, FormattingService formattingService, EntityMapper entityMapper) {
         this.processRepository = processRepository;
+        this.partyService = partyService;
+        this.formattingService = formattingService;
+        this.entityMapper = entityMapper;
     }
 
     @Transactional
     @Override
-    public String create(final ProcessDto dto) {
+    public String create(@NotNull final RequestProcessDto dto) {
         Process process = entityMapper.toEntity(dto);
         createProcess(dto, process);
-        removeFormatting(process.getParties());
+        formattingService.removeFormatting(process.getParties());
         process = processRepository.save(process);
         return process.getNumber();
     }
 
     @Transactional
     @Override
-    public void update(final String processNumber, final ProcessDto dto) {
+    public void update(@NotNull final String processNumber, @NotNull final RequestProcessDto dto) {
         Process process = getProcessByProcessNumber(processNumber);
         checkProcessStatus(process.getStatus());
         updateProcess(dto, process);
-        removeFormatting(process.getParties());
+        formattingService.removeFormatting(process.getParties());
         processRepository.save(process);
     }
 
     @Transactional
     @Override
-    public void archive(final Set<String> processesNumbers) {
+    public void archive(@NotNull final Set<String> processesNumbers) {
         List<Process> processes = getProcessByNumberIn(processesNumbers);
         checkProcessStatus(processes);
         checkNotFoundProcesses(processesNumbers, processes);
-        setProcessToAchieved(processes);
+        ArchiveCommand processCommand = new ProcessArchiveCommand(processRepository, processes);
+        processCommand.execute();
         processRepository.saveAll(processes);
     }
 
     @Override
-    public Page<ProcessDto> get(final ProcessFilter filter, final Pageable pageable) {
-        return  Optional.ofNullable(filter.getStatus())
-                .map(status -> processRepository.findByStatus(filter.getStatus(), pageable))
-                .orElseGet(() -> Optional.ofNullable(filter.getOpeningDate())
-                        .map(date -> processRepository.findByOpeningDate(filter.getOpeningDate(), pageable))
-                        .orElseGet(() -> Optional.ofNullable(filter.getLegalEntityId())
-                                .map(id -> processRepository.findByPartyLegalEntityId(filter.getLegalEntityId(), pageable))
-                                .orElseThrow(() -> new IllegalArgumentException("No filter matched the required arguments")))
-                )
-                .map(DtoMapper::toDto);
+    public Page<ProcessDto> get(@NotNull final ProcessFilter filter, @NotNull final Pageable pageable) {
+        FilterStrategy filterStrategy = ProcessFilterSelector.select(filter);
+        return filterStrategy.filter(filter, pageable, processRepository);
     }
 
     // ===== PRIVATE METHODS =====
 
-    private void createProcess(ProcessDto dto, Process process) {
+    private void createProcess(@NotNull final RequestProcessDto dto, @NotNull final Process process) {
         process.setNumber(UUID.randomUUID().toString());
         List<Party> parties = Optional.ofNullable(dto.getParties())
                 .orElse(List.of())
@@ -96,19 +94,12 @@ public class ProcessServiceImpl implements ProcessService {
         process.setParties(parties);
     }
 
-    private Party getOrCreateParty(Process process, PartyDto p) {
+    private Party getOrCreateParty(@NotNull final Process process, @NotNull final PartyDto p) {
         return partyService.getExistingParties(p.getLegalEntityId()).orElseGet(() -> {
             var result = entityMapper.toEntity(p);
             result.setProcesses(List.of(process));
             partyService.attach(result);
             return result;
-        });
-    }
-
-    public void removeFormatting(@NotNull final List<Party> parties) {
-        parties.forEach(p -> {
-            p.setLegalEntityId(RemoveFormatting.remove(p.getLegalEntityId()));
-            p.setPhone(RemoveFormatting.remove(p.getPhone()));
         });
     }
 
@@ -123,7 +114,7 @@ public class ProcessServiceImpl implements ProcessService {
             throw new ProcessNotFoundException("Process(es) with number %s not found".formatted(notFound));
     }
 
-    private static void setProcessToAchieved(final List<Process> processes) {
+    private static void setProcessToAchieved(@NotNull final List<Process> processes) {
         processes
                 .forEach(p -> p
                         .setStatus(Status.ARCHIVED)
@@ -135,10 +126,8 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     private void checkProcessStatus(@NotNull final Status status) {
-        if (status.equals(Status.ARCHIVED))
-            throw new OperationDeniedException("An Archived process(es) cannot be updated");
-        else if (status.equals(Status.SUSPENDED))
-            throw new OperationDeniedException("A Suspended process(es) cannot be updated");
+        if (status.equals(Status.ARCHIVED) || status.equals(Status.SUSPENDED))
+            throw new OperationDeniedException("%s process(es) cannot be updated".formatted(status));
     }
 
     private List<Process> getProcessByNumberIn(@NotNull final Set<String> processesNumbers) {
@@ -153,19 +142,7 @@ public class ProcessServiceImpl implements ProcessService {
         return processes;
     }
 
-    private void updateProcess(@NotNull final ProcessDto dto, @NotNull final Process process) {
-//        List<Action> newActionList = new ArrayList<>(Optional.ofNullable(process.getActions()).orElse(List.of()));
-//        newActionList.addAll(Optional.ofNullable(dto.getActions())
-//                .orElse(List.of())
-//                .stream()
-//                .map(e -> {
-//                    Action action = entityMapper.toEntity(e);
-//                    action.setProcess(process);
-//                    return action;
-//                })
-//                .toList());
-
-
+    private void updateProcess(@NotNull final RequestProcessDto dto, @NotNull final Process process) {
         process
                 .setStatus(dto.getStatus())
                 .setDescription(dto.getDescription())

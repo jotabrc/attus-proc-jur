@@ -154,12 +154,12 @@ class ProcessControllerTest {
     void get() throws Exception {
         String number1 = UUID.randomUUID().toString();
         ProcessDto dto = new ProcessDto(
-                number1,
                 LocalDateTime.now(),
                 Status.ACTIVE,
                 "Description",
                 List.of(),
-                List.of()
+                List.of(),
+                number1
         );
         Pageable pageable = PageRequest.of(0, 3);
         Page<ProcessDto> page = new PageImpl<>(List.of(dto), pageable, 1);

@@ -3,7 +3,6 @@ package attus.proc.proc_jur.dto;
 import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.validation.ValidDescription;
 import attus.proc.proc_jur.validation.ValidLocalDateTime;
-import attus.proc.proc_jur.validation.ValidProcessNumber;
 import attus.proc.proc_jur.validation.ValidStatus;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -15,12 +14,21 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ProcessDto extends ProcessAbs {
+@AllArgsConstructor
+public abstract class ProcessAbs {
 
-    private final String number;
+    @ValidLocalDateTime
+    private final LocalDateTime openingDate;
 
-    public ProcessDto(LocalDateTime openingDate, Status status, String description, List<PartyDto> parties, List<ActionDto> actions, String number) {
-        super(openingDate, status, description, parties, actions);
-        this.number = number;
-    }
+    @ValidStatus
+    private final Status status;
+
+    @ValidDescription
+    private final String description;
+
+    @Valid
+    private final List<PartyDto> parties;
+
+    @Valid
+    private final List<ActionDto> actions;
 }

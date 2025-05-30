@@ -2,25 +2,35 @@ package attus.proc.proc_jur.util;
 
 import attus.proc.proc_jur.dto.ActionDto;
 import attus.proc.proc_jur.dto.PartyDto;
+import attus.proc.proc_jur.dto.ProcessAbs;
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.model.Action;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+@Validated
 @Component
 public class EntityMapper {
 
-    public Process toEntity(final ProcessDto dto) {
+    public Process toEntity(@NotNull final ProcessAbs dto) {
+        String getNumber = null;
+        if (dto instanceof ProcessDto p) getNumber = p.getNumber();
         return Process
                 .builder()
-                .number(dto.getNumber())
+                .number(Optional
+                        .ofNullable(getNumber)
+                        .orElse("")
+                )
                 .openingDate(Optional
                         .ofNullable(dto.getOpeningDate())
                         .orElse(LocalDateTime.now())
@@ -44,7 +54,7 @@ public class EntityMapper {
                 .build();
     }
 
-    public Party toEntity(final PartyDto dto) {
+    public Party toEntity(@NotNull final PartyDto dto) {
         return Party
                 .builder()
                 .fullName(Optional
@@ -61,7 +71,7 @@ public class EntityMapper {
                 .build();
     }
 
-    public Action toEntity(final ActionDto dto) {
+    public Action toEntity(@NotNull final ActionDto dto) {
         return Action
                 .builder()
                 .type(dto.getType())

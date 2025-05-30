@@ -9,6 +9,7 @@ import attus.proc.proc_jur.model.Action;
 import attus.proc.proc_jur.model.Party;
 import attus.proc.proc_jur.model.Process;
 import attus.proc.proc_jur.repository.ProcessRepository;
+import attus.proc.proc_jur.service.filter.ProcessFilterSelector;
 import attus.proc.proc_jur.util.EntityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,14 +30,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 class ProcessServiceImplTest {
 
     @Mock
     private EntityMapper entityMapper;
+
+    @Mock
+    private FormattingService formattingService;
 
     @Mock
     private PartyServiceImpl partyService;
@@ -81,8 +85,7 @@ class ProcessServiceImplTest {
                 .actions(List.of(action))
                 .build();
 
-        ProcessDto dto = new ProcessDto(
-                "null",
+        RequestProcessDto dto = new RequestProcessDto(
                 null,
                 Status.ACTIVE,
                 "Description",
@@ -90,6 +93,7 @@ class ProcessServiceImplTest {
                 null
         );
 
+        doNothing().when(formattingService).removeFormatting(anyList());
         when(processRepository.save(any())).thenReturn(process);
         when(entityMapper.toEntity(dto)).thenReturn(process);
         String number = processService.create(dto);
@@ -107,11 +111,10 @@ class ProcessServiceImplTest {
                 "(11)91234-5678"
         );
 
-        dto = new ProcessDto(
-                "null",
+        dto = new RequestProcessDto(
                 null,
                 Status.ACTIVE,
-                "Description",
+                null,
                 List.of(partyDto),
                 List.of(actionDto)
         );
@@ -171,8 +174,7 @@ class ProcessServiceImplTest {
                 "(11)91234-5678"
         );
 
-        ProcessDto dto = new ProcessDto(
-                "null",
+        RequestProcessDto dto = new RequestProcessDto(
                 null,
                 Status.ACTIVE,
                 "Description",
@@ -187,6 +189,7 @@ class ProcessServiceImplTest {
                 .email("john@email.com")
                 .phone("12912345789")
                 .build();
+        doNothing().when(formattingService).removeFormatting(anyList());
         when(processRepository.findByNumber(any())).thenReturn(Optional.of(process));
         when(processRepository.save(any())).thenReturn(process);
         when(entityMapper.toEntity(actionDto)).thenReturn(action2);
@@ -209,8 +212,7 @@ class ProcessServiceImplTest {
                 .registrationDate(ZonedDateTime.now().withZoneSameLocal(ZoneId.of("America/Sao_Paulo")))
                 .description("SENTENCE short description")
                 .build();
-        dto = new ProcessDto(
-                "null",
+        dto = new RequestProcessDto(
                 null,
                 Status.SUSPENDED,
                 "Description",

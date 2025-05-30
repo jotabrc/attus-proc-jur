@@ -2,8 +2,10 @@ package attus.proc.proc_jur.controller;
 
 import attus.proc.proc_jur.dto.ProcessDto;
 import attus.proc.proc_jur.dto.ProcessFilter;
+import attus.proc.proc_jur.dto.RequestProcessDto;
 import attus.proc.proc_jur.enums.Status;
 import attus.proc.proc_jur.service.ProcessService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +30,9 @@ public class ProcessController {
         this.processService = processService;
     }
 
+    @Tag(name = "Create new Process")
     @PostMapping("/process")
-    public ResponseEntity<String> create(@Valid @RequestBody ProcessDto dto) {
+    public ResponseEntity<String> create(@Valid @RequestBody RequestProcessDto dto) {
         String processNumber = processService.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/process/{number}")
@@ -46,8 +49,9 @@ public class ProcessController {
                 );
     }
 
+    @Tag(name = "Update existing Process")
     @PutMapping("/process/{number}")
-    public ResponseEntity<String> update(@PathVariable("number") String processNumber, @Valid @RequestBody ProcessDto dto) {
+    public ResponseEntity<String> update(@PathVariable("number") String processNumber, @Valid @RequestBody RequestProcessDto dto) {
         processService.update(processNumber, dto);
         return ResponseEntity.ok("""
                 {
@@ -58,6 +62,7 @@ public class ProcessController {
         );
     }
 
+    @Tag(name = "Archive existing Process")
     @PatchMapping("/process")
     public ResponseEntity<String> archive(@RequestBody Set<String> processesNumbers) {
         processService.archive(processesNumbers);
@@ -70,6 +75,7 @@ public class ProcessController {
         );
     }
 
+    @Tag(name = "Get Process(es) by Status, Opening Date or Party Legal Entity Id")
     @GetMapping("/process")
     public ResponseEntity<Page<ProcessDto>> get(
             @RequestParam(required = false) Status status,

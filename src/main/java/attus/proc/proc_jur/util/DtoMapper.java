@@ -13,12 +13,12 @@ public class DtoMapper {
 
     public static ProcessDto toDto(final Process process) {
         return new ProcessDto(
-                process.getNumber(),
                 process.getOpeningDate().toLocalDateTime(),
                 process.getStatus(),
                 process.getDescription(),
                 mapParties(process.getParties()),
-                mapActions(process.getActions())
+                mapActions(process.getActions()),
+                process.getNumber()
         );
     }
 
