@@ -46,7 +46,7 @@ public class WebSecurityConfig {
                                 "/configuration/**"
                         ).permitAll()
                         .requestMatchers("/process/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterAfter(tokenGlobalFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
