@@ -8,7 +8,7 @@
 
 Representando as entidades e definições de relacionamento (Process, Party, Contact e Action).
 
-## Canada de Transferência
+## Camada de Transferência
 
 Definição dos DTOs para transferir dados entre as camadas de apresentação e serviço a fim de proteger informações confidenciais quando aplicável.
 
@@ -51,7 +51,7 @@ POSTGRES_PORT
 ```
 
 ## Gerar JWT
-Foi adicionado na parta `test-only` a classe [Unsecure.java](test-only/unsecure/Unsecure.java), pode-se utilizar com a mesma `SECRET_KEY` da aplicação e criar um JWT compatível para fins de teste.
+Foi adicionado na pasta `test-only` a classe [Unsecure.java](test-only/unsecure/Unsecure.java), pode-se utilizar com a mesma `SECRET_KEY` da aplicação e criar um JWT compatível para fins de teste.
 
 ## TLS
 Requer certificado `keystore.p12` no `classpath`.
